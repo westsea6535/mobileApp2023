@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import '../mainPage.dart';
 
 class ResultPage extends StatelessWidget {
-  bool alwaysTruPredicate(Route<dynamic> route) => true;
+  bool alwaysTruePredicate(Route<dynamic> route) => true;
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -13,12 +13,13 @@ class ResultPage extends StatelessWidget {
         body: Center(
           child: ElevatedButton(
             onPressed: () {
-              Navigator.of(context).push(MaterialPageRoute(
-                builder: (context) => MainScreen(),
-              ));
+              Navigator.of(context).popUntil((route) => route.isFirst);
 
-              print('Button Pressed!');
-            },
+              // Navigator.of(context).push(MaterialPageRoute(
+              //   builder: (context) => MainScreen(),
+              // // ));
+
+            }, 
             child: Text('to home'),
           ),
         ),
