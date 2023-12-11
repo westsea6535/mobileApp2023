@@ -1,143 +1,85 @@
-import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:image_picker/image_picker.dart';
-import 'package:google_ml_kit/google_ml_kit.dart';
-import 'package:image_cropper/image_cropper.dart';
-import 'package:flutter_tesseract_ocr/flutter_tesseract_ocr.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'firebase_options.dart';
+import 'mainPage.dart';
+import 'testPage.dart';
+import 'settingsPage.dart';
 
-void main() {
+List<String> listPoint = [];
+
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
+
   runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
+  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter OCR Demo',
+      title: 'Flutter App',
       theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
-        useMaterial3: true,
+        primarySwatch: Colors.purple,
       ),
-      home: const OCRScreen(),
+      home: const MyHomePage(),
     );
   }
 }
 
-class OCRScreen extends StatefulWidget {
-  const OCRScreen({super.key});
+class MyHomePage extends StatefulWidget {
+  const MyHomePage({Key? key}) : super(key: key);
 
   @override
-  _OCRScreenState createState() => _OCRScreenState();
+  State<MyHomePage> createState() => _MyHomePageState();
 }
 
-class _OCRScreenState extends State<OCRScreen> {
-  String _extractedText = '';
-  final ImagePicker _picker = ImagePicker();
+class _MyHomePageState extends State<MyHomePage> {
+  int _currentIndex = 0;
+
+  final List<Widget> _children = [
+    MainScreen(),
+    ListScreen(),
+    ThirdScreen(),
+  ];
+
+  void onTabTapped(int index) {
+    setState(() {
+      _currentIndex = index;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Flutter OCR Demo'),
-      ),
-      body: Center(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(16.0),
-          child: Text(
-            _extractedText.isNotEmpty ? _extractedText : 'Press the button to start OCR',
-            style: const TextStyle(fontSize: 16),
+      // appBar: AppBar(
+      //   title: Text('Bottom Navigation Example'),
+      // ),
+      body: _children[_currentIndex],
+      bottomNavigationBar: BottomNavigationBar(
+        currentIndex: _currentIndex,
+        onTap: onTabTapped,
+        items: const [
+          BottomNavigationBarItem(
+            icon: Icon(Icons.home),
+            label: 'Home',
           ),
-        ),
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: pickImage,
-        tooltip: 'Pick Image',
-        child: const Icon(Icons.add_a_photo),
-      ),
-    );
-  }
-
-  //// 사진 가져오기, 화면 크롭 관련 부분 ////
-  Future<void> pickImage() async {
-    final XFile? image = await _picker.pickImage(source: ImageSource.gallery);
-    if (image != null) {
-      final croppedFile = await ImageCropper().cropImage(
-        sourcePath: image.path,
-        aspectRatioPresets: [
-          CropAspectRatioPreset.square,
-          CropAspectRatioPreset.ratio3x2,
-          CropAspectRatioPreset.original,
-          CropAspectRatioPreset.ratio4x3,
-          CropAspectRatioPreset.ratio16x9,
-        ],
-        uiSettings: [
-          AndroidUiSettings(
-            toolbarTitle: 'Cropper',
-            toolbarColor: Colors.deepOrange,
-            toolbarWidgetColor: Colors.white,
-            initAspectRatio: CropAspectRatioPreset.original,
-            lockAspectRatio: false,
+          BottomNavigationBarItem(
+            icon: Icon(Icons.edit_note),
+            label: 'Test',
           ),
-          IOSUiSettings(
-            title: 'Cropper',
+          BottomNavigationBarItem(
+            icon: Icon(Icons.settings),
+            label: 'Settings',
           ),
         ],
-      );
+      ),
 
-      if (croppedFile != null) {
-        recognizeText(croppedFile.path);
-      }
-    }
-  }
-
-  //// Google ML Kit ////
-  // void recognizeText(String imagePath) async {
-  //   final textRecognizer = GoogleMlKit.vision.textRecognizer();
-  //   final inputImage = InputImage.fromFilePath(imagePath);
-  //   final RecognizedText recognizedText = await textRecognizer.processImage(inputImage);
-  //
-  //   String correctedText = correctLineBreaks(recognizedText.text);
-  //
-  //   setState(() {
-  //     _extractedText = correctedText;
-  //   });
-  //
-  //   textRecognizer.close();
-  // }
-  
-
-  //// Tesseract Ocr ////
-  void recognizeText(String imagePath) async {
-    try {
-      final String rawText = await FlutterTesseractOcr.extractText(
-          imagePath,
-          language: 'eng', // 영어만 사용 설정
-          args: {
-            "psm": "4", // 페이지 세그먼트 모드
-            "preserve_interword_spaces": "1" // 단어 간 공백 유지
-          }
-      );
-      final String correctedText = correctLineBreaks(rawText);
-      setState(() {
-        _extractedText = correctedText;
-      });
-    } catch (e) {
-      print("Tesseract OCR Error: $e");
-    }
-  }
-
-  
-  // 원본 지문에서 줄바꿈이 있으면 이상하게 나오는데 그걸 다듬는 함수
-  // 궁금하면 주석처리해서 테스트 가능 
-  String correctLineBreaks(String text) {
-    var correctedText = text.replaceAllMapped(
-      RegExp(r'(\w)\n(\w)'),
-          (match) {
-        return '${match.group(1)}${match.group(2)}';
-      },
     );
-    return correctedText;
   }
 }

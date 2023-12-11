@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "917908203365",
+    "project_id": "team14-f762c",
+    "storage_bucket": "team14-f762c.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:917908203365:android:0ee7a5f492b2202fa0e38c",
+        "android_client_info": {
+          "package_name": "com.example.team14"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCp-QXkUixF_xnVNwTTbkCS69EHTSYSkUc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

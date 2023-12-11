@@ -3,7 +3,12 @@
 #
 
 list(APPEND FLUTTER_PLUGIN_LIST
+  cloud_firestore
   file_selector_windows
+  firebase_auth
+  firebase_core
+  modal_progress_hud_nsn
+  simple_animation_progress_bar
 )
 
 list(APPEND FLUTTER_FFI_PLUGIN_LIST
