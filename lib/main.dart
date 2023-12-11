@@ -2,8 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
 import 'mainPage.dart';
-import 'testPage.dart';
+import 'mainTestPage.dart';
 import 'settingsPage.dart';
+import 'provider/DifficultyProvider.dart';
+import 'package:provider/provider.dart';
+import 'provider/SentencesProvider.dart';
 
 List<String> listPoint = [];
 
@@ -13,7 +16,19 @@ void main() async {
     options: DefaultFirebaseOptions.currentPlatform,
   );
 
-  runApp(const MyApp());
+  runApp(
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider(
+          create: (context) => DifficultyLevel()
+        ),
+        ChangeNotifierProvider(
+          create: (context) => SentencesList()
+        ),
+      ],
+      child: MyApp(),
+    )
+  );
 }
 
 class MyApp extends StatelessWidget {

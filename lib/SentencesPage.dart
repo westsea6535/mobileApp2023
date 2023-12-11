@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'provider/SentencesProvider.dart';
+import 'package:provider/provider.dart';
 
 class SentencesPage extends StatefulWidget {
   final List<String> sentences;
@@ -63,6 +65,9 @@ class _SentencesPageState extends State<SentencesPage> {
                     if (isEditMode) {
                       setState(() {
                         widget.sentences[index] = _controller.text;
+
+                        final sentencesList = Provider.of<SentencesList>(context, listen: false);
+                        sentencesList.setList(widget.sentences);
                       });
                       Navigator.of(context).pop();
                     } else {

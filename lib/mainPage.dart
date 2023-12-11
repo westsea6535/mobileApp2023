@@ -1,12 +1,11 @@
 import 'package:flutter/material.dart';
-// import 'package:fluttertest/settingsPage.dart';
-// import 'package:team14/settingsPage.dart';
 import 'package:simple_animation_progress_bar/simple_animation_progress_bar.dart';
 import 'ParagraphPage.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:google_ml_kit/google_ml_kit.dart';
 import 'package:image_cropper/image_cropper.dart';
 import 'package:flutter_tesseract_ocr/flutter_tesseract_ocr.dart';
+import 'provider/SentencesProvider.dart';
+import 'package:provider/provider.dart';
 
 class MainScreen extends StatefulWidget {
 
@@ -17,6 +16,8 @@ class MainScreen extends StatefulWidget {
 }
 
 class _FirstScreenState extends State<MainScreen> {
+
+
   double progressRatio = 0.4;
   Map<String, int> recentResult = {
     'correctCount': 12,
@@ -27,15 +28,7 @@ class _FirstScreenState extends State<MainScreen> {
 
 
   // Use the pattern to split the paragraph into sentences
-  List<String> sentences = [
-    "An important advantage of disclosure, as apposed to more aggressive forms of regulation, it its flexibility and respect for the operation of free markets.", 
-    "Regulatory mandates are blunt words; they tend to neglect diversity and may have serious unintended adverse effects.", 
-    "For example, energy efficiency requirements for applicances may produce goods that work less well or that have characteristics that consumers do not want.", 
-    "Information provision, by contrast, respects freedom of choice.", 
-    "If automobile manufacturers are required to measure and publicize the safety characteristics of cars, potential car purchasers can trade safety concerns against other attributes, such as price and styling.", 
-    "If restaurant customers are informed tof the calories in their meals, those who want to lose weight can make use of the information, leaving those who are unconcerned about calories unaffected.", 
-    "Disclosure does not interfere with, and should even promote, the autonomy (and quality) of individual decision-making.",
-  ];
+  List<String> sentences = [];
 
   String _extractedText = '';
 
@@ -49,16 +42,36 @@ class _FirstScreenState extends State<MainScreen> {
     super.initState();
     RegExp re = new RegExp(r"(\w|\s|,|')+[。.?!]*\s*");
 
+    if (sentences.isEmpty) {
+      Future.microtask(() {
+        List<RegExpMatch> regProcess = re.allMatches(exampleText).toList();
+        sentences = regProcess
+          .map((match) => match.group(0)) // Map to String?
+          .where((str) => str != null)     // Filter out null values
+          .map((str) => str!)              // Convert to non-nullable String
+          .toList();
+
+        final sentencesList = Provider.of<SentencesList>(context, listen: false);
+        sentencesList.setList(sentences);
+      });
+    }
+
     // 초기화 로직에 OCR 결과가 저장된 변수를 사용하여 exampleText 초기화
     if (savedOCRText != null) {
-      exampleText = savedOCRText!;
-      List<RegExpMatch> regProcess = re.allMatches(exampleText).toList();
-      sentences = regProcess
-        .map((match) => match.group(0)) // Map to String?
-        .where((str) => str != null)     // Filter out null values
-        .map((str) => str!)              // Convert to non-nullable String
-        .toList();
-    }
+      Future.microtask(() {
+        exampleText = savedOCRText!;
+        List<RegExpMatch> regProcess = re.allMatches(savedOCRText!).toList();
+        sentences = regProcess
+          .map((match) => match.group(0)) // Map to String?
+          .where((str) => str != null)     // Filter out null values
+          .map((str) => str!)              // Convert to non-nullable String
+          .toList();
+
+        print(exampleText);
+        final sentencesList = Provider.of<SentencesList>(context, listen: false);
+        sentencesList.setList(sentences);
+      });
+    } 
   }
 
   Future<void> pickImage() async {
@@ -111,6 +124,19 @@ class _FirstScreenState extends State<MainScreen> {
         _extractedText = correctedText;
         exampleText = correctedText; // OCR 결과로 업데이트
         savedOCRText = correctedText;
+
+        RegExp re = new RegExp(r"(\w|\s|,|')+[。.?!]*\s*");
+
+        List<RegExpMatch> regProcess = re.allMatches(savedOCRText!).toList();
+        sentences = regProcess
+          .map((match) => match.group(0)) // Map to String?
+          .where((str) => str != null)     // Filter out null values
+          .map((str) => str!)              // Convert to non-nullable String
+          .toList();
+
+        print(exampleText);
+        final sentencesList = Provider.of<SentencesList>(context, listen: false);
+        sentencesList.setList(sentences);
       });
     } catch (e) {
       print("Tesseract OCR Error: $e");
@@ -130,6 +156,7 @@ class _FirstScreenState extends State<MainScreen> {
 
   @override
   Widget build(BuildContext context) {
+
     return Scaffold(
       body: Center(
         child: Column(

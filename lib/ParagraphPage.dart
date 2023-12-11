@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'dart:math';
 import 'SentencesPage.dart';
+import 'provider/DifficultyProvider.dart';
+import 'package:provider/provider.dart';
+import 'test/testPage.dart';
 
 // 문단 페이지: 사용자가 숫자를 입력하고 빈칸을 만들 페이지
 class ParagraphPage extends StatelessWidget {
@@ -9,36 +12,37 @@ class ParagraphPage extends StatelessWidget {
 
   ParagraphPage({required this.paragraph, required this.sentences});
 
-  // 숫자 입력 대화상자를 표시하는 함수
-  void _showTestDialog(BuildContext context) {
-    showDialog<int>(
+  void _showDifficultyDialog(BuildContext context) {
+    showDialog(
       context: context,
       builder: (BuildContext context) {
-        int numValue = 0;
         return AlertDialog(
-          title: Text('Enter a number'),
-          content: TextField(
-            onChanged: (value) {
-              numValue = int.tryParse(value) ?? 0;
-            },
-            keyboardType: TextInputType.number,
-            decoration: InputDecoration(hintText: "Enter a number"),
-          ),
-          actions: <Widget>[
-            ElevatedButton(
-              child: Text('OK'),
-              onPressed: () {
-                Navigator.of(context).pop(numValue);
-              },
+          title: Text("Select Difficulty"),
+          content: SingleChildScrollView(
+            child: ListBody(
+              children: <Widget>[
+                _dialogButton(context, "Easy"),
+                _dialogButton(context, "Intermediate"),
+                _dialogButton(context, "Hard"),
+              ],
             ),
-          ],
+          ),
         );
       },
-    ).then((numWords) {
-      if (numWords != null) {
-        _processTextAndNavigate(context, numWords);
-      }
-    });
+    );
+  }
+
+  Widget _dialogButton(BuildContext context, String level) {
+    return ElevatedButton(
+      onPressed: () {
+        Provider.of<DifficultyLevel>(context, listen: false).setLevel(level);
+        Navigator.of(context).pop();
+        Navigator.of(context).push(MaterialPageRoute(
+          builder: (context) => TestPage(sentenceNum: 0,),
+        ));
+      },
+      child: Text(level),
+    );
   }
 
   // 빈칸으로 만들 단어의 수에 따라 새 문단을 만들고, TextDisplayPage로 이동하는 함수
@@ -84,6 +88,8 @@ class ParagraphPage extends StatelessWidget {
             children: [
               ElevatedButton(
                 onPressed: () {
+                  print(paragraph);
+                  print(sentences[0]);
                   Navigator.push(
                     context,
                     MaterialPageRoute(
@@ -94,7 +100,7 @@ class ParagraphPage extends StatelessWidget {
                 child: Text('Sentence'),
               ),
               ElevatedButton(
-                onPressed: () => _showTestDialog(context),
+                onPressed: () => _showDifficultyDialog(context),
                 child: Text('Test'),
               ),
             ],
