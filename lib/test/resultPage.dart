@@ -4,20 +4,32 @@ import 'package:provider/provider.dart';
 import '../provider/ScoreProvider.dart';
 
 class ResultPage extends StatelessWidget {
-  bool alwaysTruePredicate(Route<dynamic> route) => true;
   @override
   Widget build(BuildContext context) {
+    final recentResult = Provider.of<ScoreProvider>(context).myScore;
+
     return MaterialApp(
       home: Scaffold(
         appBar: AppBar(
-          title: Text('Button Example'),
+          title: Text('Result'),
         ),
         body: Center(
-          child: ElevatedButton(
-            onPressed: () {
-              Navigator.of(context).popUntil((route) => route.isFirst);
-            }, 
-            child: Text('to home'),
+          child: Column(
+            children: [
+              Text(
+                'Your Score: ${recentResult['correct']}/${recentResult['total']}',
+                style: TextStyle(
+                  fontSize: 40,
+                  fontWeight: FontWeight.bold,
+                )
+              ), 
+              ElevatedButton(
+                onPressed: () {
+                  Navigator.of(context).popUntil((route) => route.isFirst);
+                }, 
+                child: Text('to home'),
+              ),
+            ],
           ),
         ),
       ),
