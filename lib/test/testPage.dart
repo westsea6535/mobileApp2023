@@ -4,6 +4,7 @@ import 'dart:math';
 import 'resultPage.dart';
 import '../provider/DifficultyProvider.dart';
 import '../provider/SentencesProvider.dart';
+import '../provider/ScoreProvider.dart';
 
 class TestPage extends StatefulWidget {
   final int sentenceNum;
@@ -30,6 +31,7 @@ class _TestPageState extends State<TestPage> {
   Widget build(BuildContext context) {
     final level = Provider.of<DifficultyLevel>(context).level;
     final sentences = Provider.of<SentencesList>(context).items;
+    final scoreAccumulated = Provider.of<ScoreProvider>(context).myScore;
     final sentence = sentences[widget.sentenceNum];
 
     double blankPercentage;
@@ -51,14 +53,27 @@ class _TestPageState extends State<TestPage> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text("Selected Difficulty: $level"),
+        title: Text("$level"),
       ),
       body: Padding(
-        padding: const EdgeInsets.all(8.0),
+        padding: const EdgeInsets.all(18.0),
         child: Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    'Sentence ${widget.sentenceNum + 1}',
+                    style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                    )
+                  ),
+                  Text('Score: ${scoreAccumulated['correct']}/${scoreAccumulated['total']}')
+                ],
+              ),
               Text.rich(
                 TextSpan(children: spans),
               ),
@@ -71,6 +86,21 @@ class _TestPageState extends State<TestPage> {
                       width: 200,
                       child: ElevatedButton(
                         onPressed: () {
+                          int correctCount = 0;
+                          for (int i = 0; i < correctAnswers.length; i++) {
+                            if (textControllers[i].text.trim() == correctAnswers[i]) {
+                              correctCount++;
+                            }
+                          }
+                          int wrongCount = correctAnswers.length - correctCount;
+
+                          print('length: ${correctAnswers.length}');
+                          print('correct: ${correctCount}');
+                          print('wrong: ${wrongCount}');
+                          Provider.of<ScoreProvider>(context, listen: false).updateMap({'total': scoreAccumulated['total'] + correctAnswers.length, 'correct': scoreAccumulated['correct'] + correctCount});
+
+                          print(scoreAccumulated);
+
                           Navigator.of(context).pop();
                           Navigator.of(context).push(MaterialPageRoute(
                             builder: (context) => sentences.length - 1 == widget.sentenceNum ? ResultPage() : TestPage(sentenceNum: widget.sentenceNum + 1,),
@@ -92,11 +122,15 @@ class _TestPageState extends State<TestPage> {
     );
   }
 
+  List<String> correctAnswers = [];
   List<InlineSpan> _generateSpansForSentence(String sentence, double blankPercentage) {
     Random random = Random();
     List<String> words = sentence.split(' ');
     int numBlanks = (words.length * blankPercentage).round();
     Set<int> blankIndices = {};
+
+    correctAnswers.clear();
+    int blankIndex = 0;
 
     while (blankIndices.length < numBlanks) {
       int randomIndex = random.nextInt(words.length);
@@ -104,10 +138,10 @@ class _TestPageState extends State<TestPage> {
     }
     textControllers = List.generate(numBlanks, (_) => TextEditingController());
 
-    int blankIndex = 0;
     return List<InlineSpan>.generate(words.length, (index) {
       if (blankIndices.contains(index)) {
         double wordWidth = _calculateTextWidth(words[index]);
+        correctAnswers.add(words[index]);
 
         return WidgetSpan(
           child: Padding(

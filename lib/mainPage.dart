@@ -6,6 +6,8 @@ import 'package:image_cropper/image_cropper.dart';
 import 'package:flutter_tesseract_ocr/flutter_tesseract_ocr.dart';
 import 'provider/SentencesProvider.dart';
 import 'package:provider/provider.dart';
+import 'settingsPage.dart';
+import 'provider/ScoreProvider.dart';
 
 class MainScreen extends StatefulWidget {
 
@@ -17,15 +19,11 @@ class MainScreen extends StatefulWidget {
 
 class _FirstScreenState extends State<MainScreen> {
 
-
-  double progressRatio = 0.4;
-  Map<String, int> recentResult = {
-    'correctCount': 12,
-    'totalCount': 16,
-  };
-
   String exampleText = "An important advantage of disclosure, as apposed to more aggressive forms of regulation, it its flexibility and respect for the operation of free markets. Regulatory mandates are blunt words; they tend to neglect diversity and may have serious unintended adverse effects. For example, energy efficiency requirements for applicances may produce goods that work less well or that have characteristics that consumers do not want. Information provision, by contrast, respects freedom of choice. If automobile manufacturers are required to measure and publicize the safety characteristics of cars, potential car purchasers can trade safety concerns against other attributes, such as price and styling. If restaurant customers are informed tof the calories in their meals, those who want to lose weight can make use of the information, leaving those who are unconcerned about calories unaffected. Disclosure does not interfere with, and should even promote, the autonomy (and quality) of individual decision-making.";
 
+  List<String> paragraphList = [
+    "An important advantage of disclosure, as apposed to more aggressive forms of regulation, it its flexibility and respect for the operation of free markets. Regulatory mandates are blunt words; they tend to neglect diversity and may have serious unintended adverse effects. For example, energy efficiency requirements for applicances may produce goods that work less well or that have characteristics that consumers do not want. Information provision, by contrast, respects freedom of choice. If automobile manufacturers are required to measure and publicize the safety characteristics of cars, potential car purchasers can trade safety concerns against other attributes, such as price and styling. If restaurant customers are informed tof the calories in their meals, those who want to lose weight can make use of the information, leaving those who are unconcerned about calories unaffected. Disclosure does not interfere with, and should even promote, the autonomy (and quality) of individual decision-making.",
+  ];
 
   // Use the pattern to split the paragraph into sentences
   List<String> sentences = [];
@@ -125,6 +123,8 @@ class _FirstScreenState extends State<MainScreen> {
         exampleText = correctedText; // OCR 결과로 업데이트
         savedOCRText = correctedText;
 
+        paragraphList.add(correctedText);
+
         RegExp re = new RegExp(r"(\w|\s|,|')+[。.?!]*\s*");
 
         List<RegExpMatch> regProcess = re.allMatches(savedOCRText!).toList();
@@ -157,11 +157,29 @@ class _FirstScreenState extends State<MainScreen> {
   @override
   Widget build(BuildContext context) {
 
+    final recentResult = Provider.of<ScoreProvider>(context).myScore;
+
     return Scaffold(
+      appBar: AppBar(
+        actions: [
+          IconButton(
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => ThirdScreen()
+                ),
+              );
+            },
+            icon: Icon(Icons.settings),
+          )
+        ],
+      ),
       body: Center(
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisAlignment: MainAxisAlignment.start,
           children: <Widget>[
+            const SizedBox(height: 5),
             InkWell (
               onTap: () {
                 Navigator.push(
@@ -190,8 +208,9 @@ class _FirstScreenState extends State<MainScreen> {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: <Widget> [
+                    const SizedBox(height: 5),
                     Text(
-                      '최근 지문',
+                      'Recent Paragraph',
                       style: TextStyle(
                         fontSize: 25,
                         color: Color(0xFF7888FF),
@@ -200,15 +219,27 @@ class _FirstScreenState extends State<MainScreen> {
                     ),
                     Padding(
                       padding: const EdgeInsets.all(15.0),
-                      child: Text(
-                        exampleText,
-                        maxLines: 6,
-                        overflow: TextOverflow.ellipsis,
-                        style: TextStyle(
-                          fontSize: 16,
-                          color: Colors.black,
-                        )
-                      ),
+                      child: Container(
+                        height: 190,
+                        child: LayoutBuilder(
+                          builder: (BuildContext context, BoxConstraints constraints) {
+                            // Calculate the number of lines for the current constraints and font size
+                            final double fontSize = 15;
+                            final double lineHeight = fontSize * 1.2; // Assuming a typical line height
+                            final int maxLines = (constraints.maxHeight / lineHeight).floor() - (fontSize > 14 ? 1 : 2);
+
+                            return Text(
+                              exampleText,
+                              overflow: TextOverflow.ellipsis,
+                              style: TextStyle(
+                                fontSize: fontSize,
+                                color: Colors.black,
+                              ),
+                              maxLines: maxLines,
+                            );
+                          },
+                        ),
+                      )
                     )
                   ],
                 )
@@ -242,7 +273,7 @@ class _FirstScreenState extends State<MainScreen> {
                         )
                       ),
                       Text(
-                        '${(recentResult['correctCount']?.toDouble() ?? 0) / (recentResult['totalCount']?.toDouble() ?? 1) * 100}%',
+                        '${recentResult['total'] == 0 ? 0 : ((recentResult['correct']?.toDouble() ?? 0) / (recentResult['total']?.toDouble() ?? 1) * 100).toStringAsFixed(1)}%',
                         style: const TextStyle(
                           fontSize: 20,
                           fontWeight: FontWeight.bold,
@@ -258,7 +289,7 @@ class _FirstScreenState extends State<MainScreen> {
                       width: 300,
                       backgroundColor: const Color(0x447888FF),
                       foregrondColor: const Color(0xFF7888FF),
-                      ratio: (recentResult['correctCount']?.toDouble() ?? 0) / (recentResult['totalCount']?.toDouble() ?? 1),
+                      ratio: recentResult['total'] == 0 ? 0 : ((recentResult['correct']?.toDouble() ?? 0) / (recentResult['total']?.toDouble() ?? 1)),
                       direction: Axis.horizontal,
                       curve: Curves.fastLinearToSlowEaseIn,
                       duration: const Duration(seconds: 3),
@@ -268,30 +299,82 @@ class _FirstScreenState extends State<MainScreen> {
                 ]
               )
             ),
-            const SizedBox(height: 20),
-            Padding(
-              padding: const EdgeInsets.all(18.0),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Expanded(
-                    child: ElevatedButton(
-                      onPressed: () {},
-                      child: Text('시험 결과')
-                    ),
+            SizedBox(height:20),
+            Expanded(
+              child: Container(
+                width: double.infinity,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.only(
+                    topLeft: Radius.circular(40.0),
+                    topRight: Radius.circular(40.0),
                   ),
-                  Expanded(
-                    child: ElevatedButton(
-                      onPressed: () {},
-                      child: Text('재시험')
-                    ),
-                  )
-                ],
+                  boxShadow: <BoxShadow>[
+                    BoxShadow(
+                      color: Theme.of(context).shadowColor.withOpacity(0.3),
+                      offset: const Offset(0, 3),
+                      blurRadius: 10.0)
+                  ],
+                  color: Colors.white,
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                  child: Column(
+                    children: [
+                      SizedBox(height: 5),
+                      Text(
+                        'Paragraph List',
+                        style: TextStyle(
+                          fontSize: 25,
+                          color: Color(0xFF7888FF),
+                          fontWeight: FontWeight.w900,
+                        )
+                      ),
+                      const SizedBox(height: 10),
+                      Expanded(
+                        child: ListView.builder(
+                          itemCount: paragraphList.length,
+                          itemBuilder: (BuildContext context, int index) {
+                            return Column(
+                              children: [
+                                Container(
+                                  width: 350.0,
+                                  decoration: BoxDecoration(
+                                    borderRadius: const BorderRadius.all(Radius.circular(15.0)),
+                                    color: Colors.grey.withOpacity(0.2),
+                                  ),
+                                  child: Column(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: <Widget>[
+                                      Padding(
+                                        padding: const EdgeInsets.all(15.0),
+                                        child: Container(
+                                          child: Text(
+                                            paragraphList[index], // Replacing exampleText with the actual list element
+                                            overflow: TextOverflow.ellipsis,
+                                            style: TextStyle(
+                                              fontSize: 15,
+                                              color: Colors.black,
+                                            ),
+                                            maxLines: 2,
+                                          ),
+                                        )
+                                      )
+                                    ],
+                                  )
+                                ),
+                                SizedBox(height: 10),
+                              ],
+                            );
+                          },
+                        ),
+                      ),
+                    ],
+                  ),
+                )
               ),
             )
           ]
         ),
-      
       ),
       floatingActionButton: PopupMenuTheme(
         data: PopupMenuThemeData(
@@ -306,111 +389,9 @@ class _FirstScreenState extends State<MainScreen> {
               borderRadius: BorderRadius.circular(50),
             ),
             onPressed: () {
-              showMenu(
-                context: context,
-                position: RelativeRect.fromLTRB(
-                  MediaQuery.of(context).size.width - 130.0,
-                  MediaQuery.of(context).size.height - 250.0,
-                  MediaQuery.of(context).size.width - 30.0,
-                  0.0,
-                ),
-                items: [
-                  PopupMenuItem(
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: <Widget> [
-                        const Icon(
-                          Icons.camera_alt,
-                          size: 30,
-                          color: Color(0xFF7888FF),
-                        ),
-                        const SizedBox(width: 20.0),
-                        Container(
-                          width: 100.0,
-                          child: const Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: <Widget> [
-                              Text(
-                                '촬영하기',
-                                style: TextStyle(
-                                  fontSize: 17,
-                                  fontWeight: FontWeight.w900,
-                                  color: Color(0xFF7888FF),
-                                )
-                              ),
-                              Text(
-                                '원하는 문장을 촬영',
-                                style: TextStyle(
-                                  fontSize: 10,
-                                  fontWeight: FontWeight.w900,
-                                  color: Color(0xaa000000),
-                                )
-                              )
-                            ]
-                          )
-                        ) ,
-                        const SizedBox(width: 10.0),
-                        const Icon(
-                          Icons.arrow_forward_ios,
-                          size: 15,
-                          color: Color(0x55000000),
-                        ),
-                      ]
-                    ),
-                    value: 'item1',
-                    onTap: () {
-                      pickImage(); // OCR 기능 실행
-                    },
-                  ),
-                  PopupMenuItem(
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: <Widget> [
-                        const Icon(
-                          Icons.text_fields,
-                          size: 30,
-                          color: Color(0xFF7888FF),
-                        ),
-                        const SizedBox(width: 20.0),
-                        Container(
-                          width: 100.0,
-                          child: const Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: <Widget> [
-                              Text(
-                                '입력하기',
-                                style: TextStyle(
-                                  fontSize: 17,
-                                  fontWeight: FontWeight.w900,
-                                  color: Color(0xFF7888FF),
-                                )
-                              ),
-                              Text(
-                                '텍스트로 직접 입력',
-                                style: TextStyle(
-                                  fontSize: 10,
-                                  fontWeight: FontWeight.w900,
-                                  color: Color(0x55000000),
-                                )
-                              )
-                            ]
-                          )
-                        ) ,
-                        const SizedBox(width: 10.0),
-                        const Icon(
-                          Icons.arrow_forward_ios,
-                          size: 15,
-                          color: Color(0x55000000),
-                        ),
-                      ]
-                    ),
-                    value: 'item2',
-                  ),
-                  // Add more menu items as needed
-                ],
-              );
+              pickImage();
             },
-            child: Icon(Icons.menu, color: Colors.white,),
+            child: Icon(Icons.add, color: Colors.white,),
           ),
         ),
       ),

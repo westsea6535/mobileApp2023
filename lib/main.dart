@@ -7,6 +7,8 @@ import 'settingsPage.dart';
 import 'provider/DifficultyProvider.dart';
 import 'package:provider/provider.dart';
 import 'provider/SentencesProvider.dart';
+import 'provider/ScoreProvider.dart';
+import 'provider/ColorThemeProvider.dart';
 
 List<String> listPoint = [];
 
@@ -24,6 +26,12 @@ void main() async {
         ),
         ChangeNotifierProvider(
           create: (context) => SentencesList()
+        ),
+        ChangeNotifierProvider(
+          create: (context) => ScoreProvider()
+        ),
+        ChangeNotifierProvider(
+          create: (context) => ColorTheme()
         ),
       ],
       child: MyApp(),
@@ -57,11 +65,6 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
   int _currentIndex = 0;
 
-  final List<Widget> _children = [
-    MainScreen(),
-    ListScreen(),
-    ThirdScreen(),
-  ];
 
   void onTabTapped(int index) {
     setState(() {
@@ -72,26 +75,7 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: _children[_currentIndex],
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: _currentIndex,
-        onTap: onTabTapped,
-        items: const [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.home),
-            label: 'Home',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.edit_note),
-            label: 'Test',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.settings),
-            label: 'Settings',
-          ),
-        ],
-      ),
-
+      body: MainScreen()
     );
   }
 }

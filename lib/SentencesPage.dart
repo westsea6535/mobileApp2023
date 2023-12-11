@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'provider/SentencesProvider.dart';
 import 'package:provider/provider.dart';
+import 'provider/ColorThemeProvider.dart';
 
 class SentencesPage extends StatefulWidget {
   final List<String> sentences;
@@ -86,8 +87,18 @@ class _SentencesPageState extends State<SentencesPage> {
     );
   }
 
+  List<Map<String, Color>> colorPairs = [
+    {'background': Color(0xFFFFFFFF), 'text': Color(0xFF000000), 'border': Color(0xFFDDDDDD)},
+    {'background': Color(0xFF000000), 'text': Color(0xFFFFFFFF), 'border': Color(0xFF4C4C4C)},
+    {'background': Color(0xFF44615F), 'text': Color(0xFFFFFFFF), 'border': Color(0xFF38504E)},
+    {'background': Color(0xFFE4E6F2), 'text': Color(0xFF000000), 'border': Color(0xFFD8DAE6)},
+    {'background': Color(0xFFDDEAD6), 'text': Color(0xFF000000), 'border': Color(0xFFCADCC1)},
+    {'background': Color(0xFFD1D1D1), 'text': Color(0xFF000000), 'border': Color(0xFFCCCCCC)},
+  ];
   @override
   Widget build(BuildContext context) {
+    final selectedTheme = Provider.of<ColorTheme>(context).selectedTheme;
+
     return Scaffold(
       appBar: AppBar(
         title: const Text("Sentences"),
@@ -103,24 +114,43 @@ class _SentencesPageState extends State<SentencesPage> {
         itemBuilder: (BuildContext context, int index) {
           String item = widget.sentences[index];
           return ListTile(
-            title: Row(
-              children: [
-                Container(
-                  width: 50.0,
-                  decoration: BoxDecoration(
-                    color: Colors.grey.withOpacity(0.5),
+            minVerticalPadding: 0,
+            contentPadding: EdgeInsets.zero,
+            title: IntrinsicHeight(
+              child: Row(
+                children: [
+                  Container(
+                    constraints: BoxConstraints(
+                      minHeight: 60,
+                    ),
+                    width: 50.0,
+                    decoration: BoxDecoration(
+                      color: Colors.grey.withOpacity(0.5),
+                    ),
+                    child: Align(alignment:Alignment.center, child: Text('${index + 1}')),
                   ),
-                  child: Text('${index + 1}'),
-                ),
-                Expanded(
-                  child: Container(
-                    child: Text(
-                      item,
-                      softWrap: true,
+                  Expanded(
+                    child: Container(
+                      constraints: BoxConstraints(
+                        minHeight: 60.0, // Set your desired minimum height here
+                      ),
+                      decoration: BoxDecoration(
+                        color: colorPairs[selectedTheme]['background'],
+                      ),
+                      child: Padding(
+                        padding: const EdgeInsets.all(5.0),
+                        child: Text(
+                          item,
+                          softWrap: true,
+                          style: TextStyle(
+                            color: colorPairs[selectedTheme]['text'],
+                          ),
+                        ),
+                      ),
                     ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
             onTap: () => _showSentenceDialog(index),
           );
