@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 // import 'package:fluttertest/settingsPage.dart';
-import 'package:team14/settingsPage.dart';
+// import 'package:team14/settingsPage.dart';
 import 'package:simple_animation_progress_bar/simple_animation_progress_bar.dart';
 import 'ParagraphPage.dart';
 import 'package:image_picker/image_picker.dart';
@@ -24,7 +24,21 @@ class _FirstScreenState extends State<MainScreen> {
   };
 
   String exampleText = "An important advantage of disclosure, as apposed to more aggressive forms of regulation, it its flexibility and respect for the operation of free markets. Regulatory mandates are blunt words; they tend to neglect diversity and may have serious unintended adverse effects. For example, energy efficiency requirements for applicances may produce goods that work less well or that have characteristics that consumers do not want. Information provision, by contrast, respects freedom of choice. If automobile manufacturers are required to measure and publicize the safety characteristics of cars, potential car purchasers can trade safety concerns against other attributes, such as price and styling. If restaurant customers are informed tof the calories in their meals, those who want to lose weight can make use of the information, leaving those who are unconcerned about calories unaffected. Disclosure does not interfere with, and should even promote, the autonomy (and quality) of individual decision-making.";
+
+
+  // Use the pattern to split the paragraph into sentences
+  List<String> sentences = [
+    "An important advantage of disclosure, as apposed to more aggressive forms of regulation, it its flexibility and respect for the operation of free markets.", 
+    "Regulatory mandates are blunt words; they tend to neglect diversity and may have serious unintended adverse effects.", 
+    "For example, energy efficiency requirements for applicances may produce goods that work less well or that have characteristics that consumers do not want.", 
+    "Information provision, by contrast, respects freedom of choice.", 
+    "If automobile manufacturers are required to measure and publicize the safety characteristics of cars, potential car purchasers can trade safety concerns against other attributes, such as price and styling.", 
+    "If restaurant customers are informed tof the calories in their meals, those who want to lose weight can make use of the information, leaving those who are unconcerned about calories unaffected.", 
+    "Disclosure does not interfere with, and should even promote, the autonomy (and quality) of individual decision-making.",
+  ];
+
   String _extractedText = '';
+
 
   final ImagePicker _picker = ImagePicker();
 
@@ -33,9 +47,17 @@ class _FirstScreenState extends State<MainScreen> {
   @override
   void initState() {
     super.initState();
+    RegExp re = new RegExp(r"(\w|\s|,|')+[。.?!]*\s*");
+
     // 초기화 로직에 OCR 결과가 저장된 변수를 사용하여 exampleText 초기화
     if (savedOCRText != null) {
       exampleText = savedOCRText!;
+      List<RegExpMatch> regProcess = re.allMatches(exampleText).toList();
+      sentences = regProcess
+        .map((match) => match.group(0)) // Map to String?
+        .where((str) => str != null)     // Filter out null values
+        .map((str) => str!)              // Convert to non-nullable String
+        .toList();
     }
   }
 
@@ -120,6 +142,7 @@ class _FirstScreenState extends State<MainScreen> {
                   MaterialPageRoute(
                     builder: (context) => ParagraphPage(
                       paragraph: exampleText,
+                      sentences: sentences,
                     ),
                   ),
                 );
@@ -215,19 +238,6 @@ class _FirstScreenState extends State<MainScreen> {
                       borderRadius: BorderRadius.circular(10),
                     )
                   ),
-                  // Row(
-                  //   mainAxisAlignment: MainAxisAlignment.center,
-                  //   children: <Widget> [
-                  //     ElevatedButton(
-                  //       onPressed: () => setState(() => progressRatio -= 0.1),
-                  //       child: Text("-"),
-                  //     ),
-                  //     ElevatedButton(
-                  //       onPressed: () => setState(() => progressRatio += 0.1),
-                  //       child: Text("+"),
-                  //     ),
-                  //   ],
-                  // ),
                 ]
               )
             ),

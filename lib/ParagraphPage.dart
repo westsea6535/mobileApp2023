@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'dart:math';
+import 'SentencesPage.dart';
 
 // 문단 페이지: 사용자가 숫자를 입력하고 빈칸을 만들 페이지
 class ParagraphPage extends StatelessWidget {
   final String paragraph;
+  final List<String> sentences;
 
-  ParagraphPage({required this.paragraph});
+  ParagraphPage({required this.paragraph, required this.sentences});
 
   // 숫자 입력 대화상자를 표시하는 함수
   void _showTestDialog(BuildContext context) {
@@ -82,7 +84,12 @@ class ParagraphPage extends StatelessWidget {
             children: [
               ElevatedButton(
                 onPressed: () {
-                  // Sentence 버튼 기능 (추가 예정)
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => SentencesPage(sentences: sentences),
+                    ),
+                  );
                 },
                 child: Text('Sentence'),
               ),
