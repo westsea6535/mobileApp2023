@@ -1,18 +1,94 @@
 import 'package:flutter/material.dart';
 
-class SentencesPage extends StatelessWidget {
+class SentencesPage extends StatefulWidget {
   final List<String> sentences;
 
   SentencesPage({required this.sentences});
 
   @override
+  State<SentencesPage> createState() => _SentencesPageState();
+}
+
+
+class _SentencesPageState extends State<SentencesPage> {
+  void _showSentenceDialog(int index) {
+    String sentence = widget.sentences[index];
+    TextEditingController _controller = TextEditingController(text: sentence);
+    bool isEditMode = false;
+
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return StatefulBuilder(
+          builder: (context, setDialogState) {
+            return AlertDialog(
+              backgroundColor: Colors.white,
+              content: isEditMode
+                ? TextField(
+                    controller: _controller,
+                    autofocus: true,
+                    minLines: 3,
+                    maxLines: null,
+                  )
+                : Container(
+                    height: 300,
+                    decoration: BoxDecoration(
+                      border: Border.all(color: Colors.grey.withOpacity(0.3), width: 3.0),
+                      borderRadius: BorderRadius.circular(15.0),
+                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Text(sentence),
+                    )
+                  ),
+              actions: <Widget>[
+                if (!isEditMode)
+                  ElevatedButton(
+                    child: Text("Close"),
+                    onPressed: () => Navigator.of(context).pop(),
+                  ),
+                if (isEditMode)
+                  ElevatedButton(
+                    child: Text("Cancel"),
+                    onPressed: () {
+                      setDialogState(() {
+                        isEditMode = false;
+                        _controller.text = sentence; // Reset changes
+                      });
+                    },
+                  ),
+                ElevatedButton(
+                  child: Text(isEditMode ? "Apply" : "Modify"),
+                  onPressed: () {
+                    if (isEditMode) {
+                      setState(() {
+                        widget.sentences[index] = _controller.text;
+                      });
+                      Navigator.of(context).pop();
+                    } else {
+                      setDialogState(() {
+                        isEditMode = true;
+                      });
+                    }
+                  },
+                ),
+              ],
+            );
+          },
+        );
+      },
+      barrierDismissible: true,
+    );
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return  Scaffold(
+    return Scaffold(
       appBar: AppBar(
-        title: const Text("sentences"),
+        title: const Text("Sentences"),
       ),
       body: ListView.separated(
-        itemCount: sentences.length,
+        itemCount: widget.sentences.length,
         separatorBuilder: (BuildContext context, int index) {
           return Divider(
             height: 1,
@@ -20,13 +96,12 @@ class SentencesPage extends StatelessWidget {
           );
         },
         itemBuilder: (BuildContext context, int index) {
-          // 각 항목을 만들고 반환합니다.
-          String item = sentences[index];
+          String item = widget.sentences[index];
           return ListTile(
             title: Row(
               children: [
                 Container(
-                  width: 50.0, // 크기를 50으로 고정
+                  width: 50.0,
                   decoration: BoxDecoration(
                     color: Colors.grey.withOpacity(0.5),
                   ),
@@ -36,18 +111,16 @@ class SentencesPage extends StatelessWidget {
                   child: Container(
                     child: Text(
                       item,
-                      softWrap: true, // 줄 바꿈 허용
+                      softWrap: true,
                     ),
                   ),
                 ),
               ],
             ),
-            // 여기에 각 항목에 대한 추가 구성 요소를 추가할 수 있습니다.
+            onTap: () => _showSentenceDialog(index),
           );
         },
-      )
-
+      ),
     );
   }
 }
-
