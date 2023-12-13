@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'LoginPage.dart';
 import 'package:provider/provider.dart';
 import 'provider/ColorThemeProvider.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 
 class ThirdScreen extends StatefulWidget {
@@ -12,10 +13,8 @@ class ThirdScreen extends StatefulWidget {
 
 class _ThirdScreenState extends State<ThirdScreen> {
   final bool isLoggedin = false;
-
-  final String username = 'name';
-
-  final String email = 'abc@gmail.com';
+  final _authentication = FirebaseAuth.instance;
+  User? loggedUser;
 
   int _selectedSize = 15;
 
@@ -33,6 +32,22 @@ class _ThirdScreenState extends State<ThirdScreen> {
   int selectedIndex = 0;
 
   @override
+  void initState() {
+    super.initState();
+    getCurrentUser();
+  }
+  void getCurrentUser() {
+    try {
+      final user = _authentication.currentUser;
+      if (user != null) {
+        loggedUser = user;
+      }
+    } catch (e) {
+      print(e);
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     final selectedTheme = Provider.of<ColorTheme>(context).selectedTheme;
 
@@ -41,9 +56,7 @@ class _ThirdScreenState extends State<ThirdScreen> {
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisSize: MainAxisSize.min,
         children: [
-          Text(username, style: TextStyle(fontWeight: FontWeight.bold)),
-          SizedBox(height: 10), // Adjust the height for desired spacing
-          Text(email),
+          Text(loggedUser!.email!),
         ],
       );
     }
@@ -70,7 +83,7 @@ class _ThirdScreenState extends State<ThirdScreen> {
                 child: Icon(Icons.person, size: 40.0), // 기본 유저 아이콘
               ),
             ),
-            title: isLoggedin ? _loggedInContent() : Text('Login'),
+            title: _authentication.currentUser !=null ? _loggedInContent() : Text('Login'),
             trailing: Icon(Icons.arrow_forward_ios),
             onTap: () {
               Navigator.push(

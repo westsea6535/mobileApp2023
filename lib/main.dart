@@ -9,6 +9,7 @@ import 'package:provider/provider.dart';
 import 'provider/SentencesProvider.dart';
 import 'provider/ScoreProvider.dart';
 import 'provider/ColorThemeProvider.dart';
+import 'provider/ParagraphProvider.dart';
 
 List<String> listPoint = [];
 
@@ -32,6 +33,9 @@ void main() async {
         ),
         ChangeNotifierProvider(
           create: (context) => ColorTheme()
+        ),
+        ChangeNotifierProvider(
+          create: (context) => Paragraph()
         ),
       ],
       child: MyApp(),

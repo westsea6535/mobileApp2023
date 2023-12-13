@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'provider/SentencesProvider.dart';
 import 'package:provider/provider.dart';
 import 'provider/ColorThemeProvider.dart';
+import 'provider/ParagraphProvider.dart';
 
 class SentencesPage extends StatefulWidget {
   final List<String> sentences;
@@ -68,7 +69,11 @@ class _SentencesPageState extends State<SentencesPage> {
                         widget.sentences[index] = _controller.text;
 
                         final sentencesList = Provider.of<SentencesList>(context, listen: false);
+
                         sentencesList.setList(widget.sentences);
+
+                        String joinedSentence = widget.sentences.join(' ');
+                        Provider.of<Paragraph>(context, listen: false).setParagraph(joinedSentence);
                       });
                       Navigator.of(context).pop();
                     } else {

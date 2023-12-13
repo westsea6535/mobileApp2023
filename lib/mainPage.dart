@@ -8,6 +8,7 @@ import 'provider/SentencesProvider.dart';
 import 'package:provider/provider.dart';
 import 'settingsPage.dart';
 import 'provider/ScoreProvider.dart';
+import 'provider/ParagraphProvider.dart';
 
 class MainScreen extends StatefulWidget {
 
@@ -38,35 +39,31 @@ class _FirstScreenState extends State<MainScreen> {
   @override
   void initState() {
     super.initState();
-    RegExp re = new RegExp(r"(\w|\s|,|')+[。.?!]*\s*");
+    RegExp regex = RegExp(r'(?<=[.!?])\s+');
 
     if (sentences.isEmpty) {
       Future.microtask(() {
-        List<RegExpMatch> regProcess = re.allMatches(exampleText).toList();
-        sentences = regProcess
-          .map((match) => match.group(0)) // Map to String?
-          .where((str) => str != null)     // Filter out null values
-          .map((str) => str!)              // Convert to non-nullable String
-          .toList();
+        sentences = exampleText.trim().split(regex);
+        print('fill sentences');
+        for (String i in sentences) {
+          print(i);
+        }
+        print(sentences);
 
         final sentencesList = Provider.of<SentencesList>(context, listen: false);
         sentencesList.setList(sentences);
       });
     }
-
+    print('inside initstate');
     // 초기화 로직에 OCR 결과가 저장된 변수를 사용하여 exampleText 초기화
     if (savedOCRText != null) {
       Future.microtask(() {
         exampleText = savedOCRText!;
-        List<RegExpMatch> regProcess = re.allMatches(savedOCRText!).toList();
-        sentences = regProcess
-          .map((match) => match.group(0)) // Map to String?
-          .where((str) => str != null)     // Filter out null values
-          .map((str) => str!)              // Convert to non-nullable String
-          .toList();
 
-        print(exampleText);
+        sentences = exampleText.trim().split(regex);
+
         final sentencesList = Provider.of<SentencesList>(context, listen: false);
+        Provider.of<Paragraph>(context, listen: false).setParagraph(exampleText);
         sentencesList.setList(sentences);
       });
     } 
@@ -125,16 +122,10 @@ class _FirstScreenState extends State<MainScreen> {
 
         paragraphList.add(correctedText);
 
-        RegExp re = new RegExp(r"(\w|\s|,|')+[。.?!]*\s*");
+        RegExp regex = RegExp(r'(?<=[.!?])\s+');
 
-        List<RegExpMatch> regProcess = re.allMatches(savedOCRText!).toList();
-        sentences = regProcess
-          .map((match) => match.group(0)) // Map to String?
-          .where((str) => str != null)     // Filter out null values
-          .map((str) => str!)              // Convert to non-nullable String
-          .toList();
+        sentences = exampleText.trim().split(regex);
 
-        print(exampleText);
         final sentencesList = Provider.of<SentencesList>(context, listen: false);
         sentencesList.setList(sentences);
       });

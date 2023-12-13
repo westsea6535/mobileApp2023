@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'RegisterPage.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'mainPage.dart';
 // import 'DataStorage.dart';
 import 'package:modal_progress_hud_nsn/modal_progress_hud_nsn.dart';
 import 'firebase_options.dart';
@@ -68,24 +69,29 @@ class _LoginFormState extends State<LoginForm> {
                 height: 20,
               ),
               ElevatedButton(
-                onPressed: () {},
-                // onPressed: () async {
-                //   try {
-                //     setState(() {
-                //       saving = true;
-                //     });
-                //     final currentUser = await _authentication.signInWithEmailAndPassword(
-                //         email: email, password: password);
+                onPressed: () async {
+                  try {
+                    setState(() {
+                      saving = true;
+                    });
 
-                //     if (currentUser.user != null) {
-                //       _formKey.currentState!.reset();
-                //       if (!mounted) return;
-                //       Navigator.push(context,MaterialPageRoute(builder: (context) =>ChatPage()));}
-                //     setState(() {
-                //       saving = false;});
-                //   } catch (e) {
-                //     print('Login error');}
-                //   }, 
+                    final currentUser = await _authentication.signInWithEmailAndPassword(
+                      email: email,
+                      password: password
+                    );
+
+                    if (currentUser.user != null) {
+                      _formKey.currentState!.reset();
+                      if (!mounted) return;
+                      Navigator.of(context).popUntil((route) => route.isFirst);
+                    }
+
+                    setState(() { 
+                      saving = false;
+                    });
+                  } catch (e) {
+                    print('Login error');}
+                  }, 
                 child: Text("Enter")
               ),
               Row(
@@ -94,6 +100,7 @@ class _LoginFormState extends State<LoginForm> {
                   Text("If you did not register,"),
                   TextButton(child: Text("Register your email"),
                     onPressed: () {
+                      Navigator.of(context).popUntil((route) => route.isFirst);
                       Navigator.push(context, MaterialPageRoute(
                           builder: (context) => RegisterPage()));
                     },

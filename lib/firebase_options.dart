@@ -50,20 +50,20 @@ class DefaultFirebaseOptions {
   }
 
   static const FirebaseOptions web = FirebaseOptions(
-    apiKey: 'AIzaSyA9yQtgpEhHNJrZcksmh1F7X9cG5DyNwCk',
-    appId: '1:917908203365:web:e32dab3918716c04a0e38c',
-    messagingSenderId: '917908203365',
-    projectId: 'team14-f762c',
-    authDomain: 'team14-f762c.firebaseapp.com',
-    storageBucket: 'team14-f762c.appspot.com',
-    measurementId: 'G-5H0J1S3LYP',
+    apiKey: 'AIzaSyBxKucqEPhOseSKFRaDViAmkiH2iSXSIo8',
+    appId: '1:412094920301:web:e3ebf2b401f3fe2263f164',
+    messagingSenderId: '412094920301',
+    projectId: 'fluttertest-94a4a',
+    authDomain: 'fluttertest-94a4a.firebaseapp.com',
+    storageBucket: 'fluttertest-94a4a.appspot.com',
+    measurementId: 'G-08SGZN9GLV',
   );
 
   static const FirebaseOptions android = FirebaseOptions(
-    apiKey: 'AIzaSyCp-QXkUixF_xnVNwTTbkCS69EHTSYSkUc',
-    appId: '1:917908203365:android:0ee7a5f492b2202fa0e38c',
-    messagingSenderId: '917908203365',
-    projectId: 'team14-f762c',
-    storageBucket: 'team14-f762c.appspot.com',
+    apiKey: 'AIzaSyDaw3HvAHKWUrOWjXhZVadvX3g7Rj1dm_U',
+    appId: '1:412094920301:android:69ce7101f198f25c63f164',
+    messagingSenderId: '412094920301',
+    projectId: 'fluttertest-94a4a',
+    storageBucket: 'fluttertest-94a4a.appspot.com',
   );
 }

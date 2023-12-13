@@ -2,7 +2,7 @@
 import 'SuccessRegister.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-// import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:modal_progress_hud_nsn/modal_progress_hud_nsn.dart';
 
 class RegisterPage extends StatelessWidget {
@@ -71,34 +71,38 @@ class _RegisterFormState extends State<RegisterForm> {
                 height: 20,
               ),
               ElevatedButton(
-                onPressed: () {},  
-                // onPressed: () async {
-                //   try {
-                //     setState(() {
-                //       saving = true;
-                //     });
-                //     final newUser =
-                //       await _authentication.createUserWithEmailAndPassword(email: email, password: password);
-                //       await FirebaseFirestore.instance.collection("user").doc(newUser.user!.uid).set(
-                //         {
-                //           "userName":userName,
-                //           "password":password,
-                //           "email":email,
-                //         });
-                //       if (newUser.user != null) {
-                //         _formKey.currentState!.reset();
-                //         if (!mounted) return;
-                //         Navigator.push(
-                //             context,
-                //             MaterialPageRoute(
-                //                 builder: (context) => const SuccessRegisterPage())); setState(() {
-                //           saving = false;
-                //         });
-                //       }
-                //   }catch(e){
-                //     print(e);
-                //   }
-                // },
+                onPressed: () async {
+                  try {
+                    setState(() {
+                      saving = true;
+                    });
+                    print('where0');
+                    final newUser = await _authentication.createUserWithEmailAndPassword(email: email, password: password);
+                    // await FirebaseFirestore.instance.collection("user").doc(newUser.user!.uid).set(
+                    //   {
+                    //     "userName":userName,
+                    //     "password":password,
+                    //     "email":email,
+                    //   });
+                    print('where1');
+                    if (newUser.user != null) {
+                      _formKey.currentState!.reset();
+                      print('where2');
+                      if (!mounted) return;
+                      print('where3');
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute( builder: (context) => const SuccessRegisterPage())
+                      ); 
+                      print('where4');
+                      setState(() {
+                        saving = false;
+                      });
+                    }
+                  } catch(e){
+                    print(e);
+                  }
+                },
                 child: Text("Enter")
               ),
               Row(
